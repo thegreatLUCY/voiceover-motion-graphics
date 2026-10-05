@@ -1,0 +1,631 @@
+/* =========================================================
+   ENGINE STYLES — 1080x1920 vertical motion graphics.
+
+   DESIGN TOKENS (set per project in :root below; give EVERY colour exactly
+   one meaning and write that meaning next to it — see references/design-system.md)
+
+   EASING — chosen per purpose, never one curve for everything
+     --e-expo     confident reveals: text, cards, bars, line draws
+     --e-back     things with mass landing (2-4% overshoot): numbers, stamps, icons
+     --e-soft     colour, opacity, light changes
+     --e-circ-io  camera moves, long draws
+   ========================================================= */
+
+@import url('https://fonts.googleapis.com/css2?family=Inter+Tight:wght@200..900&family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@300..700&display=swap');
+
+:root{
+  --base:#080A0F;        /* background */
+  --deep:#0B0E14;
+  --surface:#141A26;     /* cards, panels */
+  --ink:#F4F7FB;         /* primary type */
+  --muted:#7E8A9C;       /* captions, citations, axes */
+  --n:#4E9FDB;           /* narrator / neutral data / structure */
+  --n-lo:#1E4260;
+  --cold:#4E9FDB;
+  --cold-lo:#1E4260;
+  --q:#E0A458;           /* quote-card accent (the "someone else's words" colour) */
+  --q-lo:#6B4A21;
+  --accent:#E8605B;      /* risk / danger */
+  --signal:#5AD3A2;      /* a positive outcome — use sparingly, give it one meaning */
+  --fen:#FF3D6E;         /* spare high-alarm accent; reserve for one concept or delete */
+  --fen-lo:#6B1430;
+  --line:#232B3A;
+
+  --display:"Inter Tight","Helvetica Neue",Helvetica,Arial,sans-serif;
+  --serif:"Instrument Serif",Georgia,"Times New Roman",serif;
+  --mono:"JetBrains Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
+
+  --e-expo:cubic-bezier(.16,1,.3,1);
+  --e-expo-io:cubic-bezier(.87,0,.13,1);
+  --e-back:cubic-bezier(.34,1.42,.64,1);
+  --e-back-soft:cubic-bezier(.22,1.2,.36,1);
+  --e-circ:cubic-bezier(.55,.06,.68,.19);
+  --e-circ-io:cubic-bezier(.85,0,.15,1);
+  --e-soft:cubic-bezier(.22,1,.36,1);
+  --e-snap:cubic-bezier(.2,1.6,.35,1);
+}
+
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{height:100%}
+body{
+  background:#04060A;color:var(--ink);
+  font-family:var(--display);
+  display:flex;align-items:center;justify-content:center;
+  gap:26px;padding:20px;
+  -webkit-font-smoothing:antialiased;
+  -moz-osx-font-smoothing:grayscale;
+  text-rendering:geometricPrecision;
+}
+
+/* ---------- stage ---------- */
+#wrap{position:relative;flex:0 0 auto}
+#stage{
+  position:relative;width:1080px;height:1920px;overflow:hidden;
+  background:var(--base);transform-origin:top left;
+  box-shadow:0 50px 140px rgba(0,0,0,.9);
+  user-select:none;-webkit-user-select:none;
+}
+.layer{position:absolute;inset:0}
+.center{display:flex;align-items:center;justify-content:center}
+.col{flex-direction:column}
+
+/* animation gate — nothing moves until body.playing */
+.k,.kf{animation-fill-mode:both;animation-play-state:paused}
+body.playing .k,body.playing .kf{animation-play-state:running}
+
+/* blend utilities */
+.blend-screen{mix-blend-mode:screen}
+.blend-add{mix-blend-mode:screen}
+.blend-overlay{mix-blend-mode:overlay}
+.blend-sat{mix-blend-mode:saturation}
+
+/* =========================================================
+   KEYFRAMES
+   ========================================================= */
+
+/* --- entrances --- */
+/* f0 / f1 are the plain opacity pair used for hard reveals and cuts.
+   They MUST exist: a layer pointing at a missing keyframe name gets no
+   animation effect at all and renders at its base opacity — which is how
+   a full-frame black overlay ends up covering the stage forever. */
+@keyframes f0{from{opacity:0}to{opacity:1}}
+@keyframes f1{from{opacity:1}to{opacity:0}}
+
+@keyframes fadeUp{from{opacity:0;transform:translate3d(0,16px,0)}to{opacity:1;transform:none}}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+/* dim, not fade-in: its FROM state must be opacity 1, or its backwards fill
+   hides the element during its delay phase and stacks with any entrance
+   animation already on it */
+@keyframes dimOut{from{opacity:1}to{opacity:.34}}
+@keyframes countFade{from{opacity:0;transform:translate3d(0,-10px,0)}
+                     to{opacity:1;transform:none}}
+@keyframes fadeOutK{to{opacity:0}}
+
+@keyframes popIn{
+  0%{opacity:0;transform:scale(1.10)}
+  62%{opacity:1}
+  100%{opacity:1;transform:scale(1)}
+}
+@keyframes popInHard{
+  0%{opacity:0;transform:scale(.88)}
+  55%{opacity:1;transform:scale(1.028)}
+  100%{opacity:1;transform:scale(1)}
+}
+
+/* text slam — expo-out with a settle */
+@keyframes slam{
+  0%{opacity:0;transform:scale(1.42) translate3d(0,10px,0)}
+  58%{opacity:1;transform:scale(.975)}
+  100%{opacity:1;transform:scale(1)}
+}
+
+/* mask reveals — the premium alternative to opacity fades */
+@keyframes maskUp{from{clip-path:inset(100% 0 0 0)}to{clip-path:inset(0 0 0 0)}}
+@keyframes maskRight{from{clip-path:inset(0 100% 0 0)}to{clip-path:inset(0 0 0 0)}}
+@keyframes maskIn{from{clip-path:inset(50% 50% 50% 50%)}to{clip-path:inset(0 0 0 0)}}
+@keyframes maskUpSoft{from{clip-path:inset(0 0 100% 0)}to{clip-path:inset(0 0 0 0)}}
+
+/* camera */
+@keyframes pushIn{from{transform:scale(1)}to{transform:scale(1.075)}}
+@keyframes pushIn2{from{transform:scale(1)}to{transform:scale(1.18)}}
+@keyframes pullBack{from{transform:scale(1.12)}to{transform:scale(1)}}
+
+/* atmosphere — slow, circular, never linear */
+@keyframes driftA{from{transform:translate3d(0,26px,0)}to{transform:translate3d(0,-26px,0)}}
+@keyframes driftB{from{transform:translate3d(0,-34px,0)}to{transform:translate3d(0,34px,0)}}
+@keyframes driftSlow{from{transform:translate3d(0,0,0)}to{transform:translate3d(0,-52px,0)}}
+@keyframes driftX{from{transform:translate3d(-30px,0,0)}to{transform:translate3d(30px,0,0)}}
+
+/* light */
+@keyframes shimmerK{0%,100%{opacity:.30}50%{opacity:.78}}
+@keyframes breath{0%,100%{opacity:.5}50%{opacity:1}}
+@keyframes violetCreep{
+  from{box-shadow:inset 0 0 150px 18px rgba(155,123,245,0)}
+  to  {box-shadow:inset 0 0 300px 74px rgba(155,123,245,.30)}}
+@keyframes bloom{
+  0%{opacity:0;transform:scale(.55)}
+  100%{opacity:1;transform:scale(1.35)}}
+
+/* physical */
+@keyframes strikeX{from{transform:scaleX(0)}to{transform:scaleX(1)}}
+@keyframes shakeS{
+  0%,100%{transform:translate3d(0,0,0)}
+  16%{transform:translate3d(-6px,4px,0)}
+  32%{transform:translate3d(6px,-3px,0)}
+  48%{transform:translate3d(-4px,-2px,0)}
+  64%{transform:translate3d(5px,2px,0)}
+  82%{transform:translate3d(-2px,1px,0)}}
+
+/* motion blur stand-in — a fast-exit smear on moving elements */
+@keyframes smearIn{
+  0%{opacity:0;filter:blur(14px);transform:translate3d(0,26px,0)}
+  100%{opacity:1;filter:blur(0);transform:none}}
+
+/* masked line rise — the premium text reveal.
+   Pair with .kline { overflow:hidden } so chars rise out from behind
+   a hard horizontal edge instead of fading in place. */
+@keyframes riseMask{
+  0%  {opacity:0;transform:translate3d(0,112%,0)}
+  22% {opacity:1}
+  100%{opacity:1;transform:translate3d(0,0,0)}}
+/* its sibling: chars rise AND settle, for type with weight */
+@keyframes riseSettle{
+  0%  {opacity:0;transform:translate3d(0,112%,0) scaleY(1.1)}
+  26% {opacity:1}
+  72% {transform:translate3d(0,-1.5%,0) scaleY(1)}
+  100%{opacity:1;transform:none}}
+
+/* grain */
+/* the cut: subject enters on a slow slide with a settle — no scale slam,
+   which reads as a zoom artefact rather than a camera move */
+/* ---- added for beats 3-8 ---- */
+
+/* molecule drawing: every bond path carries stroke-dasharray:2000 inline and
+   is longer than 2000 units of dash, so offset 2000 = fully hidden. No
+   per-path measurement and no CSS vars needed. */
+@keyframes ripple{0%{transform:scale(.1);opacity:0}
+                  18%{opacity:.8}
+                  100%{transform:scale(1.5);opacity:0}}
+@keyframes liftUp{from{opacity:0;transform:translate3d(0,26px,0) rotateX(38deg)}
+                  to{opacity:1;transform:none}}
+
+@keyframes drawStroke{from{stroke-dashoffset:2000}to{stroke-dashoffset:0}}
+
+/* beat 3: fog of contested dates */
+@keyframes fogLift{
+  from{opacity:0;transform:translate3d(0,26px,0) scale(.96);filter:blur(6px)}
+  to  {opacity:1;transform:none;filter:blur(0)}}
+@keyframes fogFade{to{opacity:0;transform:translate3d(0,-40px,0) scale(1.04);filter:blur(9px)}}
+@keyframes fogDrift{from{transform:translate3d(0,0,0)}to{transform:translate3d(0,-46px,0)}}
+
+/* beat 4: the manuscript burning */
+@keyframes emberRise{
+  0%  {opacity:0;transform:translate3d(0,0,0) scale(.6)}
+  25% {opacity:.9}
+  100%{opacity:0;transform:translate3d(var(--dx,0px),-420px,0) scale(1.5)}}
+@keyframes burnFrontB{
+  /* 0% MUST be transparent: fill-mode:both shows the 0% block during the
+     delay phase, so a visible 0% covers the subject from page load */
+  0%  {opacity:0}
+  14% {opacity:.94}
+  100%{opacity:1;background:radial-gradient(ellipse 6% 5% at 50% 46%,
+      transparent 18%,var(--burn) 86%)}}
+
+/* beat 5: the crystal, and lab plate elements */
+@keyframes crystalFall{
+  0%  {opacity:0;transform:translate3d(0,-380px,0) scale(.4) rotate(-50deg)}
+  22% {opacity:1}
+  100%{opacity:1;transform:none}}
+@keyframes labLine{
+  from{stroke-dashoffset:var(--lablen,600)}
+  to  {stroke-dashoffset:0}}
+@keyframes glowPulse{0%,100%{opacity:.5}50%{opacity:1}}
+
+/* beat 6: the split */
+@keyframes panelSplit{from{clip-path:inset(0 50% 0 0)}to{clip-path:inset(0 0 0 0)}}
+@keyframes slideL{from{transform:translate3d(-40px,0,0)}to{transform:none}}
+@keyframes slideR{from{transform:translate3d(40px,0,0)}to{transform:none}}
+
+/* beat 7: the twist */
+@keyframes drainAway{to{opacity:0;filter:blur(14px);transform:scale(.94)}}
+@keyframes plateRise{
+  from{opacity:0;transform:translate3d(0,60px,0) scale(.96)}
+  to  {opacity:1;transform:none}}
+@keyframes holdHard{0%,100%{transform:scale(1)}50%{transform:scale(1.012)}}
+
+/* beat 8: the still frame */
+@keyframes quietIn{from{opacity:0;transform:translate3d(0,10px,0)}to{opacity:1;transform:none}}
+
+@keyframes growW{from{transform:scaleX(0)}to{transform:scaleX(1)}}
+@keyframes growH{from{transform:scaleY(0)}to{transform:scaleY(1)}}
+
+@keyframes capEnter{
+  0%  {opacity:0;transform:translate3d(110px,0,0) scale(1.07)}
+  55% {opacity:1}
+  100%{opacity:1;transform:translate3d(0,0,0) scale(1)}}
+
+/* snow: constant fall, used at two depths (far = small + blurred) */
+@keyframes snowFall{
+  0%  {transform:translate3d(0,-70px,0)}
+  100%{transform:translate3d(-140px,2080px,0)}}
+
+@keyframes grainShift{
+  0%{transform:translate3d(0,0,0)}
+  50%{transform:translate3d(-32px,22px,0)}
+  100%{transform:translate3d(-64px,44px,0)}}
+
+/* exits */
+/* explicit from: without it this resolves to the underlying (inline) opacity,
+   and as the last animMulti entry it overrides the entrance */
+@keyframes scatterK{
+  from{opacity:1;transform:translate3d(0,0,0) scale(1)}
+  to  {opacity:0;transform:translate3d(0,-140px,0) rotate(8deg) scale(.72)}}
+@keyframes fadeOutK{from{opacity:1}to{opacity:0}}
+
+/* =========================================================
+   TYPOGRAPHY
+   ========================================================= */
+.t-d{
+  font-family:var(--display);font-weight:800;
+  letter-spacing:-.032em;line-height:.90;
+  font-feature-settings:"ss01","cv01";
+}
+.t-d-lg{font-weight:700;letter-spacing:-.026em}
+.t-m{font-family:var(--mono);font-weight:500;letter-spacing:.10em}
+.t-s{font-family:var(--serif);font-weight:400;letter-spacing:-.005em}
+.t-b{font-family:var(--display);font-weight:450;letter-spacing:-.008em;line-height:1.36}
+
+.s10{font-size:26px}.s12{font-size:32px}.s14{font-size:38px}
+/* legacy size names, kept as aliases. Dropping these silently collapsed any
+   beat still using them to 16px — which is exactly what happened to beat 3. */
+.md{font-size:38px}.lg{font-size:56px}.xl{font-size:78px}
+.xxl{font-size:112px}.huge{font-size:150px}
+.s18{font-size:48px}.s22{font-size:58px}.s28{font-size:74px}
+.s36{font-size:96px}.s48{font-size:128px}.s64{font-size:170px}.s80{font-size:214px}
+
+/* kinetic text — per-character stagger, built by shared.js */
+.kt{display:inline-block;white-space:pre}
+.kt>span{display:inline-block;will-change:transform,opacity}
+.kline{display:block;overflow:hidden;padding-bottom:.06em}
+
+/* tracking helpers */
+.tr-tight{letter-spacing:-.045em}
+.tr-wide{letter-spacing:.16em}
+.tr-vwide{letter-spacing:.30em}
+
+/* =========================================================
+   OVERLAYS
+   ========================================================= */
+#vig{
+  position:absolute;inset:0;pointer-events:none;z-index:40;
+  background:
+    radial-gradient(ellipse 82% 64% at 50% 44%,transparent 40%,rgba(0,0,0,.55) 92%),
+    linear-gradient(180deg,rgba(0,0,0,.45) 0%,transparent 16%,transparent 84%,rgba(0,0,0,.55) 100%);
+}
+#grain{
+  position:absolute;inset:-80px;pointer-events:none;z-index:60;
+  opacity:.07;mix-blend-mode:overlay;
+}
+/* subtle scanline/atmosphere film */
+#filmic{
+  position:absolute;inset:0;pointer-events:none;z-index:55;
+  /* neutral: a blue cast here put the narrator's colour into every Q frame */
+  background:radial-gradient(ellipse 120% 70% at 50% 108%,rgba(0,0,0,.35),transparent 60%);
+}
+
+/* =========================================================
+   UI CONTROLS
+   ========================================================= */
+#ui{
+  width:300px;font-family:var(--mono);font-size:12px;color:var(--muted);
+  /* the panel is taller than most viewports; without this it overflows and
+     body{align-items:center} clips the top, taking PLAY/REPLAY/tc with it */
+  max-height:calc(100vh - 40px);overflow-y:auto;overscroll-behavior:contain;
+  padding-right:8px;
+}
+#ui::-webkit-scrollbar{width:7px}
+#ui::-webkit-scrollbar-track{background:transparent}
+#ui::-webkit-scrollbar-thumb{background:#232B3A;border-radius:4px}
+#ui details{margin-top:16px}
+#ui summary{
+  cursor:pointer;list-style:none;background:var(--surface);
+  border:1px solid var(--line);border-radius:7px;padding:9px 12px;
+  font-size:11px;letter-spacing:.1em;color:var(--cold);
+}
+#ui summary::-webkit-details-marker{display:none}
+#ui summary:hover{border-color:var(--cold);color:#fff}
+#ui details[open] summary{margin-bottom:12px}
+#ui h1{font-family:var(--display);font-size:17px;font-weight:700;color:var(--ink);
+  letter-spacing:-.02em;margin-bottom:5px;line-height:1.24}
+#ui .sub{color:var(--cold);margin-bottom:16px;font-size:10.5px;letter-spacing:.09em}
+#ui code{font-family:var(--mono);color:var(--signal);font-size:10.5px}
+#ui button{
+  font-family:var(--mono);font-size:11px;background:var(--surface);
+  color:var(--ink);border:1px solid var(--line);border-radius:7px;
+  padding:9px 14px;cursor:pointer;margin:0 5px 9px 0;letter-spacing:.06em;
+  transition:border-color .18s,color .18s;
+}
+#ui button:hover{border-color:var(--cold);color:#fff}
+#ui button.on{border-color:var(--signal);color:var(--signal)}
+#bar{height:4px;background:#161C27;border-radius:3px;margin:14px 0 6px;
+  cursor:pointer;overflow:hidden}
+#fill{height:100%;width:0;background:var(--cold);border-radius:3px}
+#beatMarks{position:relative;height:17px;margin-bottom:12px}
+#beatMarks i{position:absolute;top:0;width:1px;height:6px;background:#2A3342}
+#beatMarks b{position:absolute;top:7px;font-size:9px;color:#48505F;
+  transform:translateX(-50%);font-weight:400}
+#tc{font-size:20px;color:var(--ink);letter-spacing:.05em;font-weight:300}
+#nowBeat{color:var(--signal);margin-bottom:14px;min-height:34px;line-height:1.4}
+#beatList{line-height:1.8;font-size:10.5px;color:#464E5D}
+#beatList span{color:#39414F}
+#vo{width:100%;margin-top:4px;font-size:10px;color:#48505F}
+.note{background:var(--surface);border:1px solid var(--line);border-radius:9px;
+  padding:13px;margin-top:16px;line-height:1.62;font-size:10.5px;color:#6A7486}
+.note b{color:var(--ink);font-weight:600}
+.note i{color:var(--cold);font-style:normal}
+/* SAFE-ZONE OVERLAY (press G)
+   Must sit above #vig(40) / #filmic(55) / #grain(60) / .legend(70),
+   otherwise the overlay renders UNDER them and looks like nothing happened.
+   Without an explicit display:none it is permanently visible, so the first
+   G press sets it to "block" — also indistinguishable from doing nothing. */
+#guides{
+  position:absolute;inset:0;pointer-events:none;
+  display:none;z-index:95;
+}
+#guides.on{display:block}
+#guides .z-top,#guides .z-bot{fill:#E8605B}
+#guides .z-rail{fill:#4E9FDB}
+#guides .z-band{fill:none;stroke:#5AD3A2;stroke-width:3;stroke-dasharray:12 10}
+#guides text{font-family:"JetBrains Mono",ui-monospace,monospace;font-size:23px;
+  letter-spacing:3px;font-weight:600}
+#guides .lbl-top,#guides .lbl-bot{fill:#FF8B85}
+#guides .lbl-rail{fill:#7CC0F0}
+#guides .lbl-band{fill:#7FE3BC}
+#guides .tick{stroke:#5AD3A2;stroke-width:2}
+
+.legend{position:absolute;left:0;right:0;bottom:0;z-index:70;display:flex;gap:15px;
+  padding:9px 14px;font-family:var(--mono);font-size:10.5px;color:#7E8A9C;
+  pointer-events:none;background:linear-gradient(transparent,rgba(0,0,0,.8))}
+.legend s{width:9px;height:9px;border-radius:2px;display:inline-block;margin-right:6px}
+
+/* =========================================================
+   REGISTER UTILITIES
+   The Q/N switch, as reusable classes.
+   ========================================================= */
+
+/* --- THE QUOTE CARD ---
+   The most reused element in the film. If it varies shot to shot it
+   stops reading as one physical artifact — it becomes decoration. */
+.qcard{
+  position:absolute; left:110px; width:860px;
+  /* a physical artifact: a slightly lifted dark sheet, lit from above, with
+     the amber rule casting a little of its own warmth onto the card */
+  background:
+    linear-gradient(90deg,rgba(224,164,88,.10),rgba(224,164,88,0) 22%),
+    linear-gradient(180deg,rgba(28,35,50,.86),rgba(15,19,29,.92));
+  border:2px solid rgba(224,164,88,.28);
+  border-left:6px solid var(--q);          /* the accent rule: marks quoted words */
+  border-radius:14px;
+  padding:46px 50px 34px 48px;
+  box-shadow:
+    0 44px 90px rgba(0,0,0,.62),
+    0 10px 24px rgba(0,0,0,.45),
+    inset 0 1px 0 rgba(255,255,255,.07),
+    -14px 0 46px -18px rgba(224,164,88,.55);
+  -webkit-backdrop-filter:blur(18px) saturate(1.15);
+  backdrop-filter:blur(18px) saturate(1.15);
+}
+.qcard .qtext{
+  font-family:var(--display); font-weight:450;
+  font-size:52px; line-height:1.27; letter-spacing:-.012em; color:var(--ink);
+  text-shadow:0 2px 14px rgba(0,0,0,.35);
+}
+.qcard .qtext.second{margin-top:30px}
+.qcard .qattr{
+  margin-top:28px; padding-top:20px;
+  border-top:1px solid rgba(255,255,255,.07);
+  font-family:var(--mono); font-size:24px; letter-spacing:.07em;
+  color:#909BAE;
+}
+.qcard .qattr::before{
+  content:""; display:inline-block; width:10px; height:10px; border-radius:50%;
+  background:var(--q); opacity:.75; margin-right:14px; vertical-align:1px;
+}
+/* no quotation marks on the card itself — the rule IS the marker */
+.qcard.big .qtext{font-size:64px; line-height:1.18; letter-spacing:-.02em}
+.qcard.sm  .qtext{font-size:44px}
+
+/* (see references/engine-api.md for usage) */
+.qstrike{
+  position:absolute; left:48px; right:50px; height:6px; border-radius:3px;
+  background:var(--q); box-shadow:0 0 18px rgba(224,164,88,.7);
+  transform-origin:left center;
+}
+
+/* headline type for N plates */
+.n-head{
+  font-family:var(--display); font-weight:650; color:var(--ink);
+  letter-spacing:-.025em; line-height:1.04;
+}
+.kicker{
+  font-family:var(--mono); font-size:28px; letter-spacing:.42em; color:var(--n);
+}
+
+/* mono stamp — dates, counters, doses */
+.stamp{
+  font-family:var(--mono); font-weight:600;
+  letter-spacing:.10em; color:var(--ink);
+}
+
+/* =========================================================
+   KEYFRAMES
+   ========================================================= */
+
+/* --- register transitions --- */
+
+/* Q in: memory cross-fade. SOFT. Never cuts. */
+@keyframes qIn      { from{opacity:0;transform:translate3d(-26px,0,0) scale(.985)} to{opacity:1;transform:none} }
+/* N in: fact arrives. HARD. No interpolation, no drift. */
+@keyframes nIn      { from{opacity:0;transform:none} to{opacity:1;transform:none} }
+@keyframes nWipe     { from{opacity:0;clip-path:inset(0 0 100% 0)} to{opacity:1;clip-path:inset(0 0 0 0)} }
+
+/* --- Q beats --- */
+
+/* (see references/engine-api.md for usage) */
+@keyframes warmPeak {
+  0%  {filter:saturate(1) brightness(1)}
+  38% {filter:saturate(1.55) brightness(1.16)}
+  100%{filter:saturate(1.32) brightness(1.07)}
+}
+/* (see references/engine-api.md for usage) */
+@keyframes cool     { from{filter:saturate(1) brightness(1)} to{filter:saturate(.34) brightness(.86)} }
+@keyframes coolLess { from{filter:saturate(1)} to{filter:saturate(.42) brightness(.9)} }
+/* (see references/engine-api.md for usage) */
+/* he reclines at the hips; the old version slid him 126px down through the chair */
+@keyframes sink     { from{transform:none} to{transform:translate3d(4px,6px,0) rotate(11deg)} }
+/* (see references/engine-api.md for usage) */
+@keyframes hazeUp   { from{opacity:0;transform:translateY(90px)} to{opacity:.5;transform:translateY(0)} }
+/* (see references/engine-api.md for usage) */
+@keyframes warmToGreen { from{filter:hue-rotate(0deg) saturate(1)} to{filter:hue-rotate(-62deg) saturate(1.35)} }
+
+/* --- N beats --- */
+
+/* the grid + scan line: clinical, cold, measuring */
+@keyframes gridBreathe { from{opacity:.30} to{opacity:.46} }
+@keyframes scanDown   { from{transform:translateY(-260px)} to{transform:translateY(2180px)} }
+@keyframes ruleDraw   { from{transform:scaleX(0)} to{transform:scaleX(1)} }
+
+/* (see references/engine-api.md for usage) */
+@keyframes dayTick   { from{transform:translateY(0)} to{transform:translateY(-46px)} }
+
+/* (see references/engine-api.md for usage) */
+@keyframes strikeDraw { from{transform:scaleX(0)} to{transform:scaleX(1)} }
+
+/* (see references/engine-api.md for usage) */
+@keyframes molShatter {
+  0%  {transform:none;filter:none}
+  14% {transform:translate3d(6px,-4px,0) rotate(2.5deg)}
+  28% {transform:translate3d(-5px,5px,0) rotate(-3deg)}
+  46% {transform:translate3d(3px,3px,0) rotate(1.5deg)}
+  62% {transform:translate3d(-2px,-2px,0) rotate(-1deg)}
+  100%{transform:none;filter:hue-rotate(-140deg) saturate(1.4)}
+}
+/* the new molecule draws itself, stroke by stroke */
+@keyframes molDraw {
+  from{stroke-dashoffset:var(--dash,900);opacity:.15}
+  to  {stroke-dashoffset:0;opacity:1}
+}
+
+/* (see references/engine-api.md for usage) */
+
+/* the dot field builds, one dot per 1000 deaths */
+@keyframes dotIn    { from{opacity:0;transform:scale(.2)} to{opacity:1;transform:none} }
+/* 94 of 100 light amber */
+@keyframes figLit   { from{opacity:.20;filter:saturate(0)} to{opacity:1;filter:none} }
+@keyframes figUnlit { from{opacity:1} to{opacity:.2} }
+/* (see references/engine-api.md for usage) */
+@keyframes sliverPop{ 0%{transform:scaleX(0);opacity:0} 100%{transform:scaleX(1);opacity:1} }
+/* the field going magenta — the twist resolving */
+@keyframes fieldFen { from{filter:none} to{filter:hue-rotate(-152deg) saturate(2.6)} }
+/* mortality curve split */
+@keyframes curveSplit{ from{clip-path:inset(0 0 0 0)} to{clip-path:inset(0 0 0 50%)} }
+/* the relapse bar: fills to 60% and STOPS. unalarming. */
+@keyframes barFill  { from{transform:scaleY(0)} to{transform:scaleY(1)} }
+/* treatment is BLUE not green — promising, not proven */
+@keyframes treatLit { from{opacity:.18} to{opacity:1} }
+/* the green window */
+@keyframes greenGlow{ from{opacity:0} to{opacity:.62} }
+
+/* --- the shot-10 discipline --- */
+/* (see references/engine-api.md for usage) */
+.stillplate{ position:absolute; inset:0; background:var(--base); }
+
+/* --- misc --- */
+/* a card that arrives late and leaves early; exits need fill:forwards */
+@keyframes cardOut { from{opacity:1} to{opacity:0} }
+/* small restrained arcs (a body in discomfort) — keep it subtle */
+@keyframes distress {
+  0%  {transform:translate(0,0) rotate(0deg)}
+  22% {transform:translate(5px,-3px) rotate(.7deg)}
+  46% {transform:translate(-4px,-6px) rotate(-.8deg)}
+  71% {transform:translate(4px,-4px) rotate(.6deg)}
+  100%{transform:translate(0,0) rotate(0deg)}
+}
+
+/* (see references/engine-api.md for usage) */
+@keyframes clockTick { from{transform:rotate(0deg)} to{transform:rotate(360deg)} }
+
+/* (see references/engine-api.md for usage) */
+@keyframes hOut { from{opacity:1;transform:scale(1)} to{opacity:0;transform:scale(.86)} }
+
+/* =========================================================
+   PLACED LAYERS
+   `.layer{position:absolute;inset:0}` means `right:0` and `bottom:0` are
+   already set, so a manual `left:` or `top:` alone does nothing — the element
+   stays stretched to the full 1080x1920 and any width/height is ignored.
+   Every manually-placed layer must therefore also release `right`/`bottom`,
+   or it silently spans the frame and its contents read as safe-area bleeds.
+
+   This produced nine "outside the safe band" reports across three shots that
+   were all actually laid out correctly on screen.
+   ========================================================= */
+.layer.place{ inset:auto; }
+
+
+/* =========================================================
+   POLISH PASS — added keyframes
+   ========================================================= */
+/* (see references/engine-api.md for usage) */
+.reel{display:inline-block;height:1em;overflow:hidden;vertical-align:top;line-height:1}
+.reel>span{display:block;line-height:1}
+@keyframes reelTo13 { from{transform:translateY(0)} to{transform:translateY(-13em)} }
+@keyframes reelRun  { from{transform:translateY(-13em)} to{transform:translateY(-19em)} }
+@keyframes driftUpOut{ from{opacity:1;transform:none} to{opacity:0;transform:translate3d(0,-260px,0)} }
+/* a pen stroke: drawn, not faded */
+@keyframes tickDraw { from{stroke-dashoffset:var(--dash,120);opacity:0} 10%{opacity:1} to{stroke-dashoffset:0;opacity:1} }
+/* light breathing in a warm room: barely perceptible */
+@keyframes lampBreath{ 0%,100%{opacity:.85} 50%{opacity:1} }
+
+/* (see references/engine-api.md for usage) */
+@keyframes dayNight { 0%{opacity:0} 20%{opacity:.82} 40%{opacity:.1} 62%{opacity:.86} 80%{opacity:.15} 100%{opacity:.9} }
+/* ghost text drifting up and fading (an echo / inner voice) */
+@keyframes ghostDrift { from{opacity:0;transform:translate3d(0,40px,0)} 30%{opacity:.34} to{opacity:0;transform:translate3d(0,-120px,0)} }
+/* draw any path whose --dash = its length */
+@keyframes lineDraw { from{stroke-dashoffset:var(--dash,900)} to{stroke-dashoffset:0} }
+/* the sixth mark: begins, never finishes */
+@keyframes tickHalf { from{stroke-dashoffset:var(--dash,120);opacity:0} 15%{opacity:.5} to{stroke-dashoffset:calc(var(--dash,120) * .5);opacity:.5} }
+/* (see references/engine-api.md for usage) */
+.pdot{} .plbl{}
+/* word-synced reveal: words arrive WITH the voice, so the motion must be short
+   and small — a full-line rise (riseMask) left half the sentence hanging below
+   its baseline in any mid-phrase frame */
+@keyframes wordIn { from{opacity:0;transform:translate3d(0,.22em,0);filter:blur(5px)} 60%{opacity:1;filter:blur(0)} to{opacity:1;transform:none;filter:blur(0)} }
+
+/* (see references/engine-api.md for usage) */
+/* a fluorescent tube catching: flicker, then on. "woke up in the ER" */
+@keyframes lightOn { 0%{opacity:0} 7%{opacity:.7} 11%{opacity:.08} 19%{opacity:.8} 24%{opacity:.25} 34%{opacity:.9} 100%{opacity:1} }
+/* a slow, low glow — the third ring, the one he survived */
+@keyframes ringGlow { 0%,100%{opacity:.55} 50%{opacity:1} }
+/* the x-ray: covers lift to show the dose inside, then fall back */
+@keyframes coverLift { 0%{opacity:1} 18%{opacity:.08} 72%{opacity:.08} 100%{opacity:1} }
+/* (see references/engine-api.md for usage) */
+@keyframes monthReel { from{transform:translateY(0)} to{transform:translateY(-4em)} }
+/* (see references/engine-api.md for usage) */
+.cell{} .cover{} .f10{} .flake{}
+
+/* (see references/engine-api.md for usage) */
+/* the supporter crossing to sit beside him: slow, small, unforced */
+@keyframes approach { from{transform:translate3d(-240px,0,0)} to{transform:none} }
+/* a figure stepping out of frame */
+@keyframes recede { from{opacity:1;transform:none} to{opacity:0;transform:translate3d(60px,0,0)} }
+/* dots on a rhythm line arriving */
+@keyframes dotPop { from{opacity:0;transform:scale(.2)} to{opacity:1;transform:none} }
+/* (see references/engine-api.md for usage) */
+.rd{} .tag{} .src{}
+/* the narrator annotating the archive: a highlight sweeping under a phrase */
+.hl{background:linear-gradient(rgba(78,159,219,.32),rgba(78,159,219,.32)) no-repeat 0 100%;background-size:0% 100%;border-radius:4px;padding:0 4px}
+@keyframes hlSweep { from{background-size:0% 100%} to{background-size:100% 100%} }
+/* JS-hook classes used by the style kit and examples. check.mjs requires every class in
+   markup to exist in this file (a typo'd utility class silently falls back to defaults),
+   so classes used only as selectors are declared here. Add yours. */
+.panel{} .pt{}

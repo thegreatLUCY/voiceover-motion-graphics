@@ -1,0 +1,13 @@
+# render outputs and working files from projects made with the skill
+*.mp4
+!docs/*.mp4
+*.mp3
+*.aiff
+*.wav
+review/
+VO/
+__pycache__/
+*.pyc
+.DS_Store
+node_modules/
+*.skill
