@@ -19,7 +19,21 @@ to the subject and tone:
 | **Neon / glow** | night, energy, tech, nostalgia | music, internet culture, the city at night | `neon`, dark base, `wave` |
 | **Lit 3D forms** | scientific, premium, abstract | physics, biology, products-as-concepts | `sphere`, radial gradients, `particles` |
 | **Documentary data** | sober, credible | statistics, evidence, journalism | `grid`, `regMarks`, pictograms, direct labels |
-| **Halftone / print** | retro, editorial, archival | history, newspapers, propaganda, ads | `halftone` pattern, limited palette |
+| **Halftone / print** | retro, editorial, archival | history, newspapers, propaganda, ads | `halftone` pattern, `KIT.bg.halftoneFade`, `KIT.style.riso` |
+| **Clay / soft 3D** | friendly, tactile, premium-app | product explainers, onboarding, health | `KIT.style.clay`, pastel palette, `squashLand` |
+| **Glassmorphism** | modern UI, futuristic | tech, finance, interfaces | `KIT.style.glass` over `KIT.bg.aurora` |
+| **Bauhaus / geometric** | bold, designed, rhythmic | design history, music, manifestos | `KIT.style.bauhaus`, primary palette, hard cuts |
+| **Pixel / 8-bit** | nostalgic, playful, gamer | internet culture, games, retro tech | `KIT.style.pixel`, `steps()` easing |
+| **Comic / pop art** | loud, funny, punchy | hooks, reveals, myths busted | `KIT.style.bubble`, `burst`, `actionLines`, `halftoneFade` |
+| **Watercolour** | gentle, human, memory | biography, nature, grief | `KIT.style.wash`, `paperTex`, slow fades |
+| **Chalkboard** | teacherly, worked-out | maths, science, step-by-step | `KIT.style.chalk`, `EL.drawOn`, `EL.typewriter` |
+| **Low-poly / topo** | landscape, data-terrain | geography, climate, exploration | `KIT.bg.lowPoly`, `KIT.bg.topo` |
+| **Network / constellation** | connected, systemic | social graphs, brains, the internet | `KIT.style.network`, `KIT.icon`, `drawOn` |
+| **Explainer characters** | relatable, story-led | any how-to or "imagine you…" script | `KIT.person` poses + `KIT.icon` + `KIT.chart` |
+
+Every style above is demonstrated in `gallery.py`. They are starting points: recolour them with a
+palette (`palettes.css`), combine them (a clay character on a topo map), or use their construction as a
+template for something new.
 
 Write the choice down with 3–5 rules (palette, line weight, light direction, texture, how type sits
 on it) and keep to them for the whole film. Consistency is what makes a style look intentional.
@@ -75,7 +89,12 @@ Motion should match the drawing style:
 - **Isometric**: blocks drop in with `--e-back`, build up in sequence, small shadows.
 - **Neon**: tubes draw on, then a brief flicker (`lightOn`), steady hum (`breath`).
 - **3D forms**: slow orbit/drift, highlights shifting with a moving light.
-- **Data**: bars grow, counters land on the word, pictograms light in staggered rows.
+- **Data**: bars grow, counters land on the word (`EL.counter`), pictograms light in staggered rows.
+- **Clay / bauhaus**: things drop and squash (`dropIn`, `squashLand`, `bounceIn`), rotate with weight.
+- **Pixel**: everything moves in `steps()`; no smooth easing.
+- **Comic**: smash zooms, `burst` pops with overshoot, a speech balloon pops on each line.
+- **Chalk / watercolour**: strokes draw on slowly; washes bloom outward with opacity.
+- **Glass / aurora**: slow drifting colour behind, frosted panels slide in, a `shimmerSweep` sheen.
 
 ## 5. When to go beyond SVG
 

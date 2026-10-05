@@ -40,6 +40,54 @@ two words. Use `occ` for repeated words — the KeyError lists the shot's words 
 | `EL.rng(seed)`, `EL.noise`, `EL.ridge`, `EL.plane` | seeded procedural helpers |
 | `#counter` with `data-count-to/start/end` | count-up driven by the shared clock |
 
+### Motion helpers (all scrub-exact: they are driven by the one clock, so seeking backwards works)
+| Call | What it does |
+|---|---|
+| `EL.every(t => …)` | run a function on every rendered frame — procedural motion (orbits, physics, noise drift, live numbers). Must be a pure function of `t`. |
+| `EL.drawOn(root, at, dur, stagger, ease, sel)` | draw every stroke inside `root` on, in document order (measures path lengths for you) |
+| `EL.morph(path, [d1, d2, …], at, dur, ease, {loop})` | morph a `<path>` through shapes. Shapes must have the **same command structure** (e.g. `ART.blob` with the same point count) |
+| `EL.counter(el, from, to, at, dur, {decimals, prefix, suffix, comma})` | count-up that lands on the spoken number |
+| `EL.scramble(el, at, dur)` | decode/"hacker" text resolve — kickers, labels, codes |
+| `EL.typewriter(el, at, cps, {caret})` | typed text at `cps` characters per second |
+| `EL.alongPath(el, path, at, dur, {rotate, offset})` | move an element along an SVG path (a plane on a route, a dot on a graph) |
+| `EL.annotate(el, kind, at, {color, pad, dur, from})` | hand-drawn mark on any element on stage: `circle`, `underline`, `highlight`, `box`, `arrowTo` (needs `from:[x,y]`). Measured lazily from the real layout, wraps per line |
+| `EL.boxOf(el)` / `EL.rectsOf(el)` | an element's stage-space box / per-line boxes (for placing your own marks) |
+
+## KIT (kit.js) — the creative toolkit
+Everything returns SVG markup strings in 1080×1920 user space. Insert into an `<svg>`, then animate
+with the helpers above. `KIT.defs()` is injected automatically.
+
+- **Backgrounds `KIT.bg.*`** — `aurora(colors, seed)` (+ `animateAurora(root, dur)`), `lowPoly(colors, seed)`,
+  `topo(seed)`, `bokeh(colors, n)`, `waves(colors, y0)`, `starfield(n)`, `sunburst(cx, cy, n, a, b)`,
+  `halftoneFade(color)`, `dotGrid(color)`, `isoGrid(color)`. All accept a box `x, y, w, h` so they also
+  fill panels and cards.
+- **Art directions `KIT.style.*`** — `clay(x,y,w,h,color)` soft 3D, `glass(x,y,w,h)` frosted panel,
+  `bauhaus(seed)`, `pixel(rows, palette, x, y, size)` (rows of palette indices), `bubble(x,y,w,h,tailX,tailY)`
+  speech balloon, `burst(cx,cy,r)` comic "POW", `actionLines(cx,cy)`, `wash(d,color)` watercolour,
+  `riso(d,inkA,inkB)` misregistered print, `chalk(d)` chalkboard line, `network(n, seed)` constellation.
+- **Characters `KIT.person(x, y, scale, pose, color, outline)`** — poses `stand walk wave point cheer
+  think sit`. Wrapped in `<g class="person">` so you can animate it without breaking its transform.
+- **Icons `KIT.icon(name, x, y, size, color, width)`** — 36 line icons (`KIT.ICONS`): person group heart
+  brain clock calendar globe coin bars trendUp trendDown warning check cross bolt eye lock house moon
+  sun phone chat bulb book leaf drop flag search play music shield pin atom star gift rocket.
+  Stroke-only, so `EL.drawOn` draws them.
+- **Data `KIT.chart.*`** — `bars(values, {labels, colors, max})` (animate `.bar` with `barFill`),
+  `hbars(items)`, `line(values, {area, dots})` (draw `.ln` on), `donut(cx,cy,r,pct)` + `fillRing(el, at)`,
+  `waffle(filled)`, `timeline(events)`.
+- **Hand-drawn notes `KIT.annot.*`** — `circle underline arrow highlight cross check bracket` at
+  explicit coordinates (or use `EL.annotate` to target an element).
+- **Colour** — `KIT.PALETTES` and `KIT.mix(a, b, t)`, `KIT.shade(color, ±k)`.
+
+## Palettes (palettes.css)
+Pass `palette="neonNight"` (etc.) to a shot to re-skin every token: `documentary` (default dark),
+`warmStory`, `pastel`, `neonNight`, `paperEarth`, `blueprint`, `printRetro`. Pick one per film;
+switch only for a deliberate register change.
+
+## Cookbook
+`gallery.py` builds four pages (`gallery-1..4.html`) showing every background, style, character,
+icon, chart and annotation; read `gallery.py` for the exact calls. Open them before designing — the
+fastest way to see what the kit can do.
+
 ## M (GSAP engine, motion.js — only on `gsap=True` shots)
 `const rig = M.cam(el, {perspective, origin})` · `M.plane(el, depth, {scale})` ·
 `const T = M.use(M.tl())` (name it **T** — the validator looks for `T.`/`M.` calls) ·
@@ -78,4 +126,9 @@ shot script (support filters `soft2/6/18/40`, `glowF`, `glowBig`, `grainF` are a
 - **Counters:** `reelTo13` / `reelRun` (digit reel, use `.reel`) · `monthReel` · `clockTick`.
 - **Story motion:** `sink` (recline torso) · `approach` · `recede` · `shakeS` · `distress` (tiny arcs) ·
   `coverLift` (x-ray reveal) · `figLit` / `figUnlit`.
+- **Transitions & entrances (kit):** `irisIn`/`irisOut` (circle reveal) · `wipeDiag` · `wipeUp` · `wipeLeft` ·
+  `splitOpen` · `zoomThrough` (camera flies through into the next shot) · `zoomIn` · `rackIn`/`rackOut`
+  (focus pull) · `glitchShift` · `bounceIn` · `flipIn` · `squashLand` · `dropIn` · `spinIn` · `ringFill`.
+- **Ambient (kit):** `auroraDrift` · `twinkle` · `floatY` · `spin` · `pulseScale` · `leak` (light leak) ·
+  `shimmerSweep` (sheen across `.sheen`).
 Add new keyframes to shared.css; give fade-outs an explicit `from{opacity:1}`.

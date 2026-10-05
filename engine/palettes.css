@@ -1,0 +1,10 @@
+/* Ready-made palettes. Put data-palette="<name>" on <body> (build.py: shot dict key "palette",
+   or project-wide in the template) to swap the base tokens. Accent meanings are yours to assign —
+   write them down (see references/design-system.md). */
+body[data-palette="documentary"]{ --base:#080A0F; --surface:#141A26; --ink:#F4F7FB; --muted:#7E8A9C; --n:#4E9FDB; --q:#E0A458; --accent:#E8605B; }
+body[data-palette="warmStory"]  { --base:#14100B; --surface:#221A12; --ink:#F6EDE1; --muted:#A8957E; --n:#C9744A; --q:#E0A458; --accent:#D9574A; }
+body[data-palette="pastel"]     { --base:#F7F3EC; --surface:#FFFFFF; --ink:#2B2B33; --muted:#7A7A88; --n:#7C9CFF; --q:#FF8FA3; --accent:#FF6B6B; }
+body[data-palette="neonNight"]  { --base:#07070D; --surface:#12121E; --ink:#F4F7FB; --muted:#8A8AA6; --n:#5CF2FF; --q:#FF5CD6; --accent:#C4FF4D; }
+body[data-palette="paperEarth"] { --base:#E8D9C0; --surface:#F3E9D8; --ink:#2E2117; --muted:#7D6A55; --n:#5C3A28; --q:#C08A5A; --accent:#A8442E; }
+body[data-palette="blueprint"]  { --base:#0F3A66; --surface:#124576; --ink:#E6F2FF; --muted:#9CC9F5; --n:#CFE6FA; --q:#FFD166; --accent:#FF8C69; }
+body[data-palette="printRetro"] { --base:#F1FAEE; --surface:#FFFFFF; --ink:#111111; --muted:#5A5A5A; --n:#1D3557; --q:#F4C430; --accent:#E63946; }

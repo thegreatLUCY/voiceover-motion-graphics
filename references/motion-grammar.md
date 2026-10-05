@@ -49,3 +49,26 @@
   boxes (see failure-modes: a fixed y misses the text).
 - **Time-lapse in one element**: a window that cycles dark/light (`dayNight`) says "days passed".
 - **Schematic chart**: lines that diverge to show a concept — always labelled SCHEMATIC.
+
+## Transitions between shots
+A cut is the default and usually the best. Use a transition only when it *means* something:
+- **Iris / zoom-through** (`irisIn`, `zoomThrough`): going *inside* something — into a cell, a city, a memory.
+- **Wipes** (`wipeDiag`, `wipeLeft`, `splitOpen`): one thing replacing another — before/after, myth/fact.
+- **Rack focus** (`rackOut` on the old plane, `rackIn` on the new): shifting attention within one world.
+- **Glitch** (`glitchShift`): something broken, digital, wrong. Once per film at most.
+Keep transitions under 0.6 s and land them on a word boundary or inside a pause.
+
+## Procedural motion (EL.every)
+When keyframes can't express it — an orbit, a pendulum, a swarm, a live graph that tracks a counter —
+compute the frame from `t` directly: `EL.every(t => el.setAttribute("cx", 540 + 200*Math.cos(t*1.3)))`.
+Rules: pure function of `t` (no accumulating state, so scrubbing and rendering are exact), seeded
+randomness only, and keep it cheap — it runs for every frame of the render.
+
+## Character animation (KIT.person)
+Characters sell a story when they *act on the word*: a wave on "hello", a point on "this", a cheer on
+the payoff. Swap poses with a quick cross-fade or `squashLand`; add `floatY` breathing at 2–4 px so a
+standing figure never looks frozen. Keep one character design per film.
+
+## Annotation as emphasis
+`EL.annotate` turns any word into the beat: circle the key term as it's spoken, underline the claim,
+arrow to the number. One annotation per shot — it's punctuation, not decoration.

@@ -355,6 +355,127 @@ const EL = {
     return w;
   },
 
+
+  /* ============ PROCEDURAL & ADVANCED MOTION ============
+     EL.every(fn) registers fn(t) to run on EVERY frame with the shot's local time,
+     during playback, scrubbing AND rendering (render.mjs seeks then calls render(t)).
+     Anything you can compute from t is animatable and stays frame-exact. */
+  _ticks: [],
+  every(fn){ EL._ticks.push(fn); return fn; },
+
+  /* stage-space box of any element (unaffected by preview scaling) */
+  boxOf(el){
+    let x=0, y=0, e=el;
+    if (el instanceof SVGElement && el.getBBox){
+      const b=el.getBBox(), m=el.getCTM && el.ownerSVGElement ? el.getCTM() : null;
+      const svg=el.ownerSVGElement; const sb=EL.boxOf(svg);
+      const vb=svg.viewBox && svg.viewBox.baseVal && svg.viewBox.baseVal.width ? svg.viewBox.baseVal : {x:0,y:0,width:svg.clientWidth,height:svg.clientHeight};
+      const kx=sb.w/vb.width, ky=sb.h/vb.height;
+      return {x:sb.x+(b.x-vb.x)*kx, y:sb.y+(b.y-vb.y)*ky, w:b.width*kx, h:b.height*ky};
+    }
+    while(e && e.id!=="stage"){ x+=e.offsetLeft||0; y+=e.offsetTop||0; e=e.offsetParent; }
+    return {x, y, w:el.offsetWidth, h:el.offsetHeight};
+  },
+
+  /* draw any lines/shapes on (stroke-dashoffset), staggered */
+  drawOn(root, at, dur=.9, stagger=.06, ease="var(--e-expo)", sel="path,line,polyline,circle,ellipse,rect"){
+    const els=[...(root.matches && root.matches(sel) ? [root] : []), ...root.querySelectorAll(sel)];
+    els.forEach((p,i)=>{ const L=p.getTotalLength ? p.getTotalLength() : 400;
+      p.style.strokeDasharray=L; p.style.setProperty("--dash",L); EL.anim(p,"lineDraw",at+i*stagger,dur,ease); });
+    return els;
+  },
+
+  /* shape morph: animate an SVG <path> through several path strings.
+     Shapes interpolate smoothly when they share the same command structure
+     (e.g. ART.blob with the same `points`; KIT shapes from the same generator). */
+  _dyn: 0,
+  morph(path, shapes, at, dur, ease="var(--e-soft)", {loop=false}={}){
+    const name="morph"+(++EL._dyn);
+    const steps=shapes.map((d,i)=>`${(i/(shapes.length-1)*100).toFixed(2)}%{d:path("${d}")}`).join(" ");
+    let st=document.getElementById("dynKeyframes");
+    if(!st){ st=document.createElement("style"); st.id="dynKeyframes"; document.head.appendChild(st); }
+    st.textContent += `@keyframes ${name}{${steps}}\n`;
+    path.setAttribute("d", shapes[0]);
+    if(loop){ EL.loop(path, name, dur, ease, true); path.style.animationDelay=at+"s"; }
+    else EL.anim(path, name, at, dur, ease);
+    return path;
+  },
+
+  /* text decode/scramble: random glyphs resolve left to right into the text */
+  scramble(el, at, dur=1.0, {glyphs="ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789#%&*+=<>/", text=null}={}){
+    const final=text ?? el.textContent; el.textContent="";
+    const hash=(i,f)=>{ let h=(i*374761393+f*668265263)>>>0; h=(h^(h>>>13))*1274126177>>>0; return h; };
+    EL.every(t=>{ const p=Math.max(0,Math.min(1,(t-at)/dur)); if(t<at){ el.textContent=""; return; }
+      const n=final.length, solid=Math.floor(p*n), f=Math.floor(t*30);
+      el.textContent=[...final].map((c,i)=> i<solid||c===" " ? c : (i<solid+6 ? glyphs[hash(i,f)%glyphs.length] : "")).join(""); });
+    return el;
+  },
+
+  /* typewriter with a blinking caret */
+  typewriter(el, at, cps=22, {caret=true}={}){
+    const final=el.textContent; el.textContent="";
+    EL.every(t=>{ const n=Math.max(0,Math.floor((t-at)*cps)); const shown=final.slice(0,Math.min(n,final.length));
+      const blink= caret && (n<final.length || Math.floor(t*2)%2===0) ? "▍" : "";
+      el.textContent = t<at ? "" : shown+blink; });
+    return el;
+  },
+
+  /* number counter with formatting, eased, landing exactly at at+dur */
+  counter(el, from, to, at, dur=1.2, {decimals=0, prefix="", suffix="", comma=true, ease=p=>1-Math.pow(1-p,3)}={}){
+    EL.every(t=>{ const p=Math.max(0,Math.min(1,(t-at)/dur)), v=from+(to-from)*ease(p);
+      let s=v.toFixed(decimals); if(comma) s=s.replace(/\B(?=(\d{3})+(?!\d))/g,",");
+      el.textContent=prefix+s+suffix; });
+    return el;
+  },
+
+  /* move an element along an SVG path (vehicles, dots on a route, a pen tip) */
+  alongPath(el, path, at, dur, {ease=p=>p<.5?2*p*p:1-Math.pow(-2*p+2,2)/2, rotate=false, offset=[0,0]}={}){
+    const L=path.getTotalLength();
+    EL.every(t=>{ const p=Math.max(0,Math.min(1,(t-at)/dur)), e=ease(p), q=path.getPointAtLength(e*L);
+      let r=""; if(rotate){ const q2=path.getPointAtLength(Math.min(L,e*L+1)); r=` rotate(${Math.atan2(q2.y-q.y,q2.x-q.x)*180/Math.PI})`; }
+      el.setAttribute("transform",`translate(${q.x+offset[0]} ${q.y+offset[1]})${r}`); });
+    return el;
+  },
+
+  /* stage-space rectangles of an element as actually painted: one per line fragment
+     for wrapped inline text. Measures the real layout (handles preview scaling). */
+  rectsOf(el){
+    const sr=stage.getBoundingClientRect(), k=1080/sr.width;
+    return [...el.getClientRects()].map(r=>({x:(r.left-sr.left)*k, y:(r.top-sr.top)*k, w:r.width*k, h:r.height*k}))
+      .filter(r=>r.w>1 && r.h>1);
+  },
+
+  /* hand-drawn annotation around/under any element on stage, drawn on at `at`.
+     kind: circle | underline | highlight | arrowTo (opts.from=[x,y]) | box
+     Geometry is measured LAZILY on the first frame at/after `at`, when the target has
+     finished entering, so entrance transforms and line wraps can't misplace it. */
+  annotate(target, kind, at, {color="#F5C451", pad=14, dur=.7, from=null, settle=.5}={}){
+    let layer=document.getElementById("annoLayer");
+    if(!layer){ layer=document.createElementNS("http://www.w3.org/2000/svg","svg");
+      layer.id="annoLayer"; layer.setAttribute("viewBox","0 0 1080 1920"); layer.setAttribute("width","1080"); layer.setAttribute("height","1920");
+      layer.style.cssText="position:absolute;inset:0;pointer-events:none;overflow:visible";
+      stage.insertBefore(layer, document.getElementById("cutBlack")); }
+    const g=document.createElementNS("http://www.w3.org/2000/svg","g"); layer.appendChild(g);
+    let built=false;
+    const build=()=>{
+      const R=EL.rectsOf(target); if(!R.length) return false;
+      const U={x:Math.min(...R.map(r=>r.x)), y:Math.min(...R.map(r=>r.y))};
+      U.w=Math.max(...R.map(r=>r.x+r.w))-U.x; U.h=Math.max(...R.map(r=>r.y+r.h))-U.y;
+      let m="";
+      if(kind==="circle") m=KIT.annot.circle(U.x+U.w/2, U.y+U.h/2, U.w/2+pad*1.6, U.h/2+pad, color);
+      else if(kind==="underline") m=R.map(r=>KIT.annot.underline(r.x-4, r.x+r.w+4, r.y+r.h+pad*.3, color)).join("");
+      else if(kind==="highlight") m=R.map(r=>KIT.annot.highlight(r.x-pad/2, r.y+r.h*.12, r.w+pad, r.h*.82, color)).join("");
+      else if(kind==="arrowTo") m=KIT.annot.arrow(from[0], from[1], U.x+U.w/2, U.y-pad, color);
+      else if(kind==="box") m=`<rect class="anno" x="${U.x-pad}" y="${U.y-pad}" width="${U.w+pad*2}" height="${U.h+pad*2}" rx="10" fill="none" stroke="${color}" stroke-width="5" filter="url(#rough)"/>`;
+      g.innerHTML=m;
+      if(kind==="highlight") g.querySelectorAll(".annoHi").forEach(r=>EL.anim(r,"growW",at,dur*.8,"var(--e-expo)"));
+      else EL.drawOn(g, at, dur, .12);
+      return true;
+    };
+    EL.every(t=>{ if(!built && t>=at-.02 && t>=settle) built=build(); });
+    return g;
+  },
+
   /* the N cold-in. Facts arrive; they do not dissolve. */
   nwipe(mount, {pop=0, dur=.34}={}){
     const w = document.createElement("div");
@@ -523,6 +644,7 @@ function render(v){
      are scrubbed from here, so the animation and the scrub bar cannot disagree
      and scrubbing backwards is exact. Shots still on CSS keyframes ignore
      this — motion.js is only present on migrated shots. */
+  for (const f of EL._ticks) { try { f(t); } catch(e){ console.error(e); } }
   if (window.M && M.seek) { try { M.seek(t, CFG.dur); } catch(e){} }
   else if (document.querySelector('script[src$="motion.js"]')) {
     /* motion.js is loaded but M is not reachable — the engine is dead and every

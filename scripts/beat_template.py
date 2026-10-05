@@ -16,12 +16,14 @@ HEAD = """<!DOCTYPE html>
 <meta charset="utf-8">
 <title>@PROJECT@ · PART @PART@ · SHOT @N@ — @TITLE@</title>
 <link rel="stylesheet" href="shared.css">
+<link rel="stylesheet" href="palettes.css">
 <script src="beats.js"></script>
 @GSAP@
 </head>
-<body data-offset="@OFF@" data-dur="@DUR@" data-beat="@N@" data-part="@PART@" data-grain="@GRAIN@">
+<body data-offset="@OFF@" data-dur="@DUR@" data-beat="@N@" data-part="@PART@" data-grain="@GRAIN@" data-palette="@PALETTE@">
 
 <script src="defs.js"></script>
+<script src="kit.js"></script>
 <div id="wrap">
 <div id="stage">
   <div class="layer" style="background:@BG@"></div>
@@ -78,7 +80,7 @@ HEAD = """<!DOCTYPE html>
 
 def build(d, part=1, total_shots=1, project="PROJECT"):
     """d: dict with n, title, off, dur, bg, tc, body, script, notes, legend,
-    file, optional grain (0-0.1) and gsap (True to load GSAP + motion.js)."""
+    file, optional grain (0-0.1), palette (see palettes.css) and gsap (True to load GSAP + motion.js)."""
     n = d["n"]
     s = HEAD
     gs = bool(d.get("gsap"))
@@ -88,6 +90,7 @@ def build(d, part=1, total_shots=1, project="PROJECT"):
            "@BODY@": d["body"], "@SCRIPT@": d["script"], "@NOTES@": d.get("notes", ""),
            "@FILE@": d["file"], "@GRAIN@": str(d.get("grain", .05)),
            "@GSAP@": GSAP if gs else "",
+           "@PALETTE@": d.get("palette", ""),
            # GSAP has no backwards fill: the closing plate must start hidden or it covers the shot
            "@CUTOP@": ";opacity:0" if gs else "",
            "@MOTION@": '<script src="motion.js"></script>' if gs else "",

@@ -1,58 +1,157 @@
-# voiceover-motion-graphics
+<div align="center">
 
-**An AI-agent skill for making premium, voiceover-synced motion-graphics videos — in HTML.**
+# 🎬 voiceover-motion-graphics
 
-Give an agent (Claude, or any coding model) a script and a voiceover. It designs and builds the video
-as a set of HTML "beat" pages — hand-built SVG illustration, kinetic typography, data animation, a
-real camera rig — where **every animation lands on the word that's being spoken**. Then it validates
-the pages, reviews screenshots of its own work, and renders a frame-exact 1080×1920 MP4 with your audio.
+### Turn a script and a voiceover into a studio-quality motion-graphics video — made by an AI agent, in HTML.
 
-Made for vertical shorts (TikTok / Reels / YouTube Shorts) and narrated explainers.
+[![License: MIT](https://img.shields.io/badge/license-MIT-2BD99F?style=flat-square)](LICENSE)
+[![Release](https://img.shields.io/github/v/release/thegreatLUCY/voiceover-motion-graphics?style=flat-square&color=6C5CE7)](../../releases/latest)
+![Format](https://img.shields.io/badge/output-1080×1920%20MP4-F5C451?style=flat-square)
+![Agents](https://img.shields.io/badge/works%20with-Claude%20·%20any%20coding%20agent-4E9FDB?style=flat-square)
+
+<a href="docs/demo.mp4"><img src="docs/demo.gif" width="300" alt="Demo: a 47-second video made with this skill, every animation synced to the voice"></a>
+
+**▶ [Watch the demo with sound](docs/demo.mp4)** · 47 seconds · every animation lands on a spoken word
+
+</div>
+
+---
+
+## ✨ What it does
+
+You give an agent a **script** and a **voiceover**. It designs the video, draws the artwork, animates
+it so **every reveal lands on the word being spoken**, checks its own work, and renders a
+frame-exact MP4 with your audio.
+
+<table>
+<tr>
+<td width="33%" valign="top">
+
+### 🎙️ The voice is the clock
+A speech aligner timestamps every word. Every reveal, count-up, highlight and cut is tied to a
+word — re-record the voice and the whole film re-times itself.
+
+</td>
+<td width="33%" valign="top">
+
+### 🎨 Draws anything, in any style
+20+ art directions — lit vector, paper, blueprint, ink, isometric, neon, clay, glass, bauhaus, pixel,
+comic, watercolour, chalk, low-poly — plus characters, icons, charts and hand-drawn notes.
+
+</td>
+<td width="33%" valign="top">
+
+### 🔍 Checks its own work
+A validator catches silent bugs, and a review loop makes the agent **look at screenshots of its
+frames** before calling anything done.
+
+</td>
+</tr>
+</table>
+
+---
+
+## 🧰 The kit
+
+Everything below is drawn in code, so it can be recoloured, combined and animated on any word.
+
+<table>
+<tr>
+<td align="center" width="25%"><img src="docs/kit-backgrounds.jpg" alt="Backgrounds"><br><b>🌌 Backgrounds</b><br><sub>aurora · low-poly · topographic · bokeh · waves · starfield · sunburst · halftone · dot &amp; iso grids</sub></td>
+<td align="center" width="25%"><img src="docs/kit-styles.jpg" alt="Art styles"><br><b>🖌️ Art styles</b><br><sub>clay 3D · glass · bauhaus · pixel · comic · watercolour · riso · chalk · network</sub></td>
+<td align="center" width="25%"><img src="docs/kit-characters.jpg" alt="Characters and icons"><br><b>🧍 Characters &amp; icons</b><br><sub>7 posable characters · 36 line icons that draw themselves on</sub></td>
+<td align="center" width="25%"><img src="docs/kit-data.jpg" alt="Data and annotations"><br><b>📊 Data &amp; notes</b><br><sub>bars · lines · donuts · waffles · timelines · hand-drawn circles, arrows, ticks</sub></td>
+</tr>
+</table>
+
+### 🎞️ Motion toolbox
+
+| | Move | What it's for |
+|---|---|---|
+| ✍️ | **Draw-on** | lines, icons and diagrams draw themselves as they're named |
+| 🫧 | **Morph** | one shape becomes another — ideas transforming |
+| 🔢 | **Counters** | numbers land exactly on the spoken number |
+| ⌨️ | **Typewriter & decode** | text types or "decrypts" into place |
+| ⭕ | **Annotate** | circle, underline or arrow to any word as it's said |
+| 🛤️ | **Follow a path** | a dot travels a route, a plane flies a map |
+| 🎥 | **Camera rig** | real depth planes, parallax and slow pushes (GSAP) |
+| 🌀 | **Transitions** | iris, wipes, zoom-through, rack focus, glitch |
+| ♾️ | **Procedural** | orbits, swarms, live graphs — any motion you can write as a function of time |
+| 🎨 | **Palettes** | 7 one-line looks: documentary, warm story, pastel, neon night, paper, blueprint, print |
+
+---
+
+## 🎬 From the demo
 
 <p align="center">
-  <img src="docs/scene.jpg" width="260" alt="A lit vector scene with a word-synced caption">
-  <img src="docs/data.jpg" width="260" alt="A data shot: 60 of 100 pictograms light on the word sixty">
-  <img src="docs/styles.jpg" width="260" alt="Six art directions: paper, blueprint, ink, isometric, neon, light">
+  <img src="docs/narrator.jpg" width="160" alt="Narrator card with hand-drawn underline">
+  <img src="docs/scene.jpg" width="160" alt="Lit scene with camera rig">
+  <img src="docs/quote.jpg" width="160" alt="Quote card with word-synced reveal">
+  <img src="docs/data.jpg" width="160" alt="60 of 100 pictograms light on the word sixty">
+  <img src="docs/styles.jpg" width="160" alt="Six art directions">
+  <img src="docs/endcard.jpg" width="160" alt="End card with morphing neon shape">
 </p>
+<p align="center"><sub>narrator card · lit scene with a camera rig · word-synced quote · data on the word · six styles · morphing end card</sub></p>
 
-> **Demo video:** _coming soon — rendered with a human-sounding voiceover._
+---
 
-## What makes the output look professional
+## 🔄 How it works
 
-- **The voice is the clock.** A speech aligner (faster-whisper) gives every word a timestamp; every
-  reveal, count-up, highlight and cut is tied to a word. Re-record the voice and the whole video re-times itself.
-- **Real illustration, not clip-art.** One key light, gradients, rim light, contact shadows, depth
-  planes and a slow camera push. A style kit covers very different looks: paper cut-out, blueprint,
-  hand-drawn ink, isometric, neon, lit 3D forms, documentary data.
-- **A motion grammar.** Purpose-specific easing curves, durations, reading-time rules and a catalogue
-  of ~100 keyframes, so motion is varied and deliberate instead of "fade everything".
-- **Guardrails for agents.** A validator catches silent bugs (animations that never play, plates
-  covering the stage, broken timelines), a documented list of failure modes explains each one, and a
-  mandatory screenshot review loop makes the agent look at its frames before it calls anything done.
+```mermaid
+flowchart LR
+    A["📝 Script<br/>one paragraph = one shot"] --> B["🎨 Art direction<br/>style · palette · shot plan"]
+    B --> C["🛠️ Build<br/>HTML beat pages"]
+    C --> D{"✅ Validate<br/>check.mjs"}
+    D -- fix --> C
+    D --> E["👀 Review<br/>contact sheets"]
+    E -- fix --> C
+    E --> F["🎙️ Voiceover<br/>word timestamps"]
+    F --> G["🎞️ Render<br/>frame-exact MP4"]
+```
 
-## Install
+| Step | What happens |
+|---|---|
+| 1️⃣ **Script** | Paragraphs are shaped around what the viewer should *see*. |
+| 2️⃣ **Art direction** | The agent picks a style and palette for *this* story and plans every shot: the words, the one idea, the visual metaphor, which word triggers what. |
+| 3️⃣ **Build** | Each shot is an HTML page: layered SVG artwork + choreography where every time is a word (`W(n, "sixty")`). |
+| 4️⃣ **Validate** | Catches animations that never play, plates covering the stage, fades that snap back, overruns, gaps. |
+| 5️⃣ **Review** | Screenshots at 30/60/95 % of every shot, scored against a checklist — at least two passes. |
+| 6️⃣ **Voiceover** | Drop in your recording; faster-whisper aligns every word and the film re-times itself. |
+| 7️⃣ **Render** | Playwright seeks every frame exactly and ffmpeg muxes your audio: 1080×1920 H.264 + AAC. |
 
-**Claude app (claude.ai / desktop):** download `voiceover-motion-graphics.skill` from the
-[latest release](../../releases/latest) and open it — it installs as a skill.
+---
 
-**Claude Code:**
+## 🚀 Install
+
+**🟣 Claude app (claude.ai / desktop)** — download `voiceover-motion-graphics.skill` from the
+[latest release](../../releases/latest) and open it.
+
+**⌨️ Claude Code**
 ```bash
 git clone https://github.com/thegreatLUCY/voiceover-motion-graphics ~/.claude/skills/voiceover-motion-graphics
 ```
 
-**Any other agent:** clone the repo and tell the agent to read `SKILL.md` and follow it.
+**🤖 Any other agent** — clone the repo and tell the agent to read `SKILL.md` and follow it.
 
-### Requirements
+Then just ask: ***"Make a motion-graphics video for this script."***
+
+<details>
+<summary><b>📦 Requirements</b></summary>
+
 - Python 3 (+ `pip install pillow` for contact sheets, `pip install faster-whisper` for real voiceovers)
-- Node 18+ and Playwright with Chromium — inside your project folder: `npm i playwright && npx playwright install chromium`
+- Node 18+ and Playwright with Chromium — in your project folder: `npm i playwright && npx playwright install chromium`
 - ffmpeg
-- Internet access while rendering (Google Fonts, and GSAP from jsDelivr for camera shots)
+- Internet while rendering (Google Fonts, and GSAP from jsDelivr for camera shots)
 
-## Quick start (by hand)
+</details>
+
+<details>
+<summary><b>🧑‍💻 Quick start by hand</b></summary>
 
 ```bash
-bash scripts/init_project.sh ./my-video     # engine + scripts + example project
+bash scripts/init_project.sh ./my-video     # engine + scripts + example + kit gallery
 cd my-video && npm i playwright && npx playwright install chromium
+python3 gallery.py                                     # build the KIT cookbook — open gallery-1..4.html
 python3 estimate_timings.py script.txt timings.json    # timings before you have audio
 python3 build.py && node check.mjs                     # build the pages, validate (must PASS)
 node review.mjs review 1                               # screenshots + contact sheets — look at them
@@ -64,23 +163,37 @@ python3 build.py && node check.mjs
 node render.mjs 1 30 video.mp4 VO/part1.mp3            # 1080x1920 H.264 + AAC
 ```
 
-With an agent, just ask: *"Make a motion-graphics video for this script"* — the skill tells it the rest.
+</details>
 
-## What's inside
+<details>
+<summary><b>🎙️ Tips for the voiceover</b></summary>
 
-| Path | Contents |
-|---|---|
-| `SKILL.md` | the workflow the agent follows |
-| `engine/` | `shared.css` (tokens, keyframes, cards) · `shared.js` (clock, kinetic type, word sync, builders) · `motion.js` (GSAP camera rig) · `defs.js` (example scenes + style kit) |
-| `scripts/` | project init, timing estimate, voiceover aligner, build helpers, validator, review, render, audio split |
-| `example/` | a 6-shot demo that uses every technique |
-| `references/` | art direction & drawing guide, design system, motion grammar, illustration recipes, engine API, failure modes, voiceover format, review checklist |
+- One paragraph of script = one shot. Leave a blank line between paragraphs.
+- Spell numbers out ("sixty", not "60") so the aligner can find them.
+- A natural, human read (ElevenLabs, or your own voice) makes the biggest difference to the final feel.
+- After `vosync.py`, read the printed transcript next to each paragraph — it shows any line that was dropped.
 
-## Credits and licences
+</details>
 
-MIT licensed (see `LICENSE`). Pages load [GSAP](https://gsap.com) from a CDN under GSAP's own licence
-(free for most uses — check it for yours) and fonts from Google Fonts (Inter Tight, JetBrains Mono,
-Instrument Serif — SIL Open Font License). Nothing third-party is bundled in this repo.
+---
 
-The engine grew out of producing a narrated documentary series; contributions — new styles, artwork,
-fixes — are welcome.
+## 🗂️ What's inside
+
+| | Path | Contents |
+|---|---|---|
+| 📘 | `SKILL.md` | the workflow the agent follows |
+| ⚙️ | `engine/` | `shared.js` one clock + motion helpers · `kit.js` the creative toolkit · `defs.js` scenes & style primitives · `motion.js` GSAP camera · `shared.css` ~125 keyframes · `palettes.css` |
+| 🛠️ | `scripts/` | init, timing estimate, voiceover aligner, validator, review, render, audio split |
+| 🎬 | `example/` | the 6-shot demo above + `gallery.py`, the kit cookbook |
+| 📚 | `references/` | drawing anything, design system, motion grammar, illustration, engine API, failure modes, voiceover, review checklist |
+
+---
+
+## 💛 Credits & licence
+
+MIT licensed — use it, remix it, ship videos with it. Pages load [GSAP](https://gsap.com) from a CDN
+under GSAP's own licence and fonts from Google Fonts (Inter Tight, JetBrains Mono, Instrument Serif —
+SIL Open Font License). Nothing third-party is bundled.
+
+Built while producing a narrated documentary series. **Contributions are welcome** — new styles,
+characters, transitions, palettes, fixes. If you make something with it, open an issue and share it! 🎉

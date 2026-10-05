@@ -18,14 +18,18 @@ choreography — and looking at your own frames honestly.
 ## What's in this skill
 
 ```
-engine/      shared.css (design tokens, ~100 keyframes, card styles), shared.js (clock, playback,
-             kinetic type, word sync, card/page builders), motion.js (GSAP camera rig, parallax),
-             defs.js (artwork: example scenes in one art direction + a STYLE KIT of primitives for any
-             look — paper, blueprint, ink, isometric, neon, lit 3D, organic shapes, textures)
+engine/      shared.css (design tokens, ~125 keyframes incl. transitions), palettes.css (7 palettes),
+             shared.js (one clock, kinetic type, word sync, cards, plus motion helpers: drawOn, morph,
+             counter, scramble, typewriter, alongPath, annotate, every-frame procedural motion),
+             motion.js (GSAP camera rig, parallax), defs.js (example scenes + style primitives),
+             kit.js (KIT: 10 backgrounds, 11 art styles, posable characters, 36 icons, charts,
+             hand-drawn annotations, palettes)
 scripts/     init_project.sh · estimate_timings.py · vosync.py · timing.py · beat_template.py
              check.mjs · review.mjs · grab.mjs · contact_sheet.py · render.mjs · split_audio.py
 example/     build.py + script.txt — a 6-shot demo: narrator card, camera-rigged scene, quote card,
              data on the word, a six-style sampler, end card. Copy its patterns, not its pictures.
+             gallery.py — the KIT cookbook: 4 pages showing every background, style, character,
+             icon, chart and annotation. Build and look at it before designing.
 references/  drawing-anything.md · design-system.md · motion-grammar.md · illustration.md
              engine-api.md · failure-modes.md · voiceover.md · review-checklist.md
 ```
@@ -52,10 +56,12 @@ python3 estimate_timings.py script.txt timings.json   # stand-in timings until a
 
 ### 3. Art direction and shot design — before any code
 1. **Choose the film's visual language from its story**, not from what's already in `defs.js`.
-   Read `references/drawing-anything.md`: pick a style (lit vector, paper cut-out, blueprint, ink,
-   isometric, neon, 3D forms, documentary data, halftone… or your own), write 3–5 rules for it, and
-   decide the colour semantics (`references/design-system.md`). The bundled rooms and silhouettes
-   are worked examples of one style — reuse them only when they are genuinely the right image.
+   Run `python3 gallery.py` and look at `gallery-1..4.html` to see what the kit can do. Read
+   `references/drawing-anything.md`: pick a style (lit vector, paper, blueprint, ink, isometric,
+   neon, clay, glass, bauhaus, pixel, comic, watercolour, chalk, low-poly, explainer characters…
+   or your own), a palette from `palettes.css`, write 3–5 rules for it, and decide the colour
+   semantics (`references/design-system.md`). Bundled scenes and kit pieces are starting points —
+   recolour, combine and extend them; draw new things whenever the story needs them.
 2. **Plan every shot** in a short table: the words, the one idea the frame must communicate, the
    visual metaphor (generate a few, keep the most concrete), the entrance type, and which words
    trigger which events.
@@ -78,7 +84,8 @@ Draw new artwork for the project — that's expected, not optional. Put it in `d
 (never big inline SVG blobs in shots), built from the style kit and the construction techniques in
 `drawing-anything.md`, and screenshot each hero illustration on its own to refine it before
 animating it. Read `references/engine-api.md` for the helpers (`EL.pages`, `EL.ncard`, `EL.syncWords`,
-`EL.kinetic`, `M.cam`/`M.plane`/`M.parallax`, the keyframe catalogue) and
+`EL.kinetic`, `EL.drawOn`/`morph`/`counter`/`annotate`/`every`, `M.cam`/`M.plane`/`M.parallax`,
+the `KIT` toolkit, the keyframe catalogue) and
 `references/illustration.md` + `references/motion-grammar.md` for how to make it look expensive.
 
 ### 5. Validate
@@ -127,8 +134,13 @@ contact sheets.
   colour changes become storytelling (a colour's first appearance can be a reveal).
 - **Light makes vector art look real.** One key light, gradients, rim highlights, contact shadows,
   depth planes and a slow camera move turn flat shapes into a "shot". Flat fills read as clip-art.
-- **Vary the motion language.** Masked rises, line draws, count-ups, stamps, highlight sweeps,
-  pictogram staggers, wipes. Identical fades on every element is the fastest way to look amateur.
+- **Vary the motion language.** Masked rises, line draws, count-ups, stamps, morphs, highlight
+  sweeps, pictogram staggers, hand-drawn annotations, characters that act on the word, procedural
+  motion. Identical fades on every element is the fastest way to look amateur.
+- **Be creative on purpose.** Each film deserves its own look. Before building, ask: what would a
+  great studio do with *this* story? Then pick the style, palette and one signature move (a morph,
+  a camera fly-through, a character, a hand-drawn note) that makes it memorable — and keep it
+  consistent. The kit is a vocabulary, not a template.
 - **Restraint where it matters.** For heavy or sensitive moments, stillness and plainness are more
   powerful than effects. Don't decorate grief, risk or numbers people must take seriously.
 - **Honesty on screen.** Schematic charts must say they're schematic; quotes are verbatim with a

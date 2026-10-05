@@ -684,7 +684,7 @@ function injectDefs(grads=[]){
   const map={warmRoom:ART.warmRoom,keyLight:ART.keyLight,coldField:ART.coldField,
              shaft:ART.shaft,haze:ART.haze};
   const svg=`<svg id="defs" width="0" height="0" aria-hidden="true"
-      style="position:absolute"><defs>${all.map(g=>map[g](g)).join("")}${ART.support()}</defs></svg>`;
+      style="position:absolute"><defs>${all.map(g=>map[g](g)).join("")}${ART.support()}${window.KIT?KIT.defs():""}</defs></svg>`;
   const old=document.getElementById("defs");
   if(old) old.remove();
   document.body.insertAdjacentHTML("afterbegin", svg);

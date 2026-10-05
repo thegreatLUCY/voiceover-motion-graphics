@@ -14,6 +14,7 @@
 | Empty frame in long pauses | page `end` fires at the pause | `EL.pages(..., {holdGaps:true})` keeps a page up until the next arrives |
 | Text overlaps text during a page turn | incoming card enters before the outgoing leaves | `EL.pages` serialises pages (`freeAt`); do the same for custom panels |
 | A layer's `width/height` ignored, "bleeds" the safe zone | `.layer` sets inset:0 | use `class="layer place"` with explicit box |
+| An SVG element jumps to the top-left when animated | a CSS animation on `transform` replaces the element's SVG `transform` attribute | animate a wrapper `<g>` with no transform attribute (KIT.person/KIT.icon already do this) |
 | SVG transform scales from the frame's corner | SVG `transform-origin` defaults to the viewBox | `transform-box:fill-box; transform-origin:50% 50%` on the element |
 | Strike-through misses the words | a fixed y for a line whose wrap varies | measure word boxes at runtime and draw one bar per line |
 | Text glow clipped into a dark box | `text-shadow` inside an `overflow:hidden` reel | use `filter: drop-shadow()` on the parent |

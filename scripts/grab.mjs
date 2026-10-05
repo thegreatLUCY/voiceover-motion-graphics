@@ -24,8 +24,9 @@ for (const job of process.argv.slice(3)) {
     document.body.classList.add('playing'); });
   await p.waitForTimeout(300);
   for (const t of ts.split(',').map(Number)) {
-    await p.evaluate(t => { for (const a of document.getAnimations()) { a.pause(); a.currentTime = t * 1000; }
-      if (window.M && M.seek) M.seek(t); if (typeof render === 'function') render(t); }, t);
+    await p.evaluate(t => { /* render first: per-frame ticks may create animations (lazy annotations), then seek them all */
+      if (typeof render === 'function') render(t); else if (window.M && M.seek) M.seek(t);
+      for (const a of document.getAnimations()) { a.pause(); a.currentTime = t * 1000; } }, t);
     await p.waitForTimeout(80);
     await p.screenshot({ path: `${out}/${f.replace(/.*\//, '').replace('.html', '')}_${t}.png`, clip: { x: 0, y: 0, width: 1080, height: 1920 } });
   }

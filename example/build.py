@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
 """EXAMPLE BUILD — five shots that demonstrate every technique in the skill.
 Copy this file's patterns; replace the SHOTS with your own.
+Kit features shown: text decode, hand-drawn annotations on spoken words, light leak,
+bokeh dust, donut ring, watercolour/ink/isometric/neon/aurora panels, aurora + shape morph.
 
     python3 estimate_timings.py script.txt timings.json   # before the voiceover exists
     python3 vosync.py VO/part1.mp3 script.txt timings.json  # once it does
@@ -38,9 +40,12 @@ n = 1
 SHOTS.append(dict(n=n, title="NARRATOR CARD", grain=.04,
   body=COLD + '\n  <div class="layer" id="nMount"></div>',
   notes="Cold plate, kicker, headline words synced to the voice, hard cut.",
-  script=COLD_JS + f'''EL.ncard($("#nMount"), {{kicker:"SHOT 1 · NARRATOR", at:{W(n,"Every")}, top:820, size:84,
+  script=COLD_JS + f'''const nc = EL.ncard($("#nMount"), {{kicker:"SHOT 1 · NARRATOR", at:{W(n,"Every")}, top:820, size:84,
   times:{WS(n,"Every","hard")},
-  text:"Every shot starts with a voice. This one is <span style=\\"color:var(--n)\\">cut hard.</span>"}});
+  text:"Every shot starts with a voice. This one is <span class=\\"key\\" style=\\"color:var(--n)\\">cut hard.</span>"}});
+/* the kicker decodes; the key phrase gets a hand-drawn underline as it's said */
+EL.scramble(nc.querySelector(".kicker"), {max(0,W(n,"Every")-0.15):.2f}, 0.9);
+EL.annotate(nc.querySelector(".n-head .key"), "underline", {WE(n,"hard"):.2f}, {{color:"#4E9FDB"}});
 {cut(n)}'''))
 
 # ── 2 · story scene with a real camera rig (GSAP engine) ───────────
@@ -54,6 +59,8 @@ SHOTS.append(dict(n=n, title="STORY SCENE", grain=.08, gsap=True,
         + svg("light", '<rect width="1080" height="1920" fill="url(#keyLight)"/>'
               '<path d="M612 316 L928 316 L780 1402 L180 1402 Z" fill="url(#shaft)" opacity=".42"/>',
               "opacity:0;mix-blend-mode:screen")
+        + svg("dust", "", "opacity:0;mix-blend-mode:screen")
+        + svg("leakL", '<ellipse cx="300" cy="700" rx="420" ry="620" fill="#FFB36B" filter="url(#soft90)"/>', "opacity:0;mix-blend-mode:screen")
         + '\n  <div class="layer place" id="capWrap" style="left:110px;top:1400px;width:860px;height:200px;background:radial-gradient(ellipse 70% 90% at 30% 50%,rgba(10,7,4,.75),rgba(10,7,4,0))">'
           '<div id="cap" class="n-head" style="font-size:56px;color:#F3D2A4">A warm room, a figure in silhouette, and one light from the window.</div></div>'),
   notes="Four depth planes on a perspective rig, slow push, ambient parallax; type lives OUTSIDE the rig.",
@@ -72,6 +79,11 @@ M.rise($("#rig"), 0.00, {{ dur: 1.0, y: 0, scale: 1.02, ease: M.EASE.colour }});
 T.fromTo("#light", {{ opacity: 0 }}, {{ opacity: 1, duration: 1.6, ease: M.EASE.colour }}, {W(n,"window")-1.2:.2f});
 T.fromTo(rig, {{ x: 40, scale: 1.055 }}, {{ x: 0, scale: 1.0, duration: {D-0.4:.2f}, ease: M.EASE.camera }}, 0.10);
 M.parallax(rig, [$("#pFig"), $("#pMid"), $("#pWin"), $("#pFar")], {{ amount: 22, dur: 15, rotate: 0.28 }});
+/* atmosphere: dust drifting in the window light, one warm light leak */
+$("#dust svg").innerHTML = KIT.bg.bokeh(["#FFE2B0","#FFD27F"], 14, 21, 560, 300, 420, 1000) + KIT.bg.starfield(70, 5, 560, 300, 420, 1100);
+EL.anim($("#dust"), "fadeIn", 1.0, 1.5, "var(--e-soft)");
+EL.loop($("#dust svg"), "floatY", 4.5, "var(--e-circ-io)", true);
+EL.anim($("#leakL"), "leak", 0.2, 3.2, "var(--e-soft)");
 /* CSS word reveal for the caption, synced to the voice */
 EL.kineticWords($("#cap"), {{name:"wordIn", stagger:.2, dur:.42, delay:{W(n,"A")}}});
 EL.syncWords($("#cap"), {WS(n,"A","window")});
@@ -88,6 +100,8 @@ EL.pages($("#cardLayer"), [
   {{text:{Q("Quotes live on a card.")}, at:{W(n,"Quotes")}, end:{WE(n,"card")+0.3:.2f}, cls:"big", times:{WS(n,"Quotes","card")}}},
   {{text:{Q("Each word appears at the moment it is spoken, and the card turns its page when the sentence ends.")}, at:{W(n,"Each")}, times:{WS(n,"Each","ends")}}}
 ], {{holdGaps:true, attr:"EXAMPLE CARD · replace with a real, cited source", top:620, hold:{D-0.6:.2f}}});
+const spoken = [...document.querySelectorAll("#cardLayer .qtext span")].find(s => s.textContent.startsWith("spoken"));
+EL.annotate(spoken, "circle", {W(n,"spoken")+0.05:.2f}, {{color:"#F5C451"}});
 {cut(n)}'''))
 
 # ── 4 · data: pictogram lights on the spoken number ────────────────
@@ -96,8 +110,9 @@ SHOTS.append(dict(n=n, title="DATA ON THE WORD", grain=.04,
   body=COLD + svg("crowdLayer", '<g id="crowdArt"></g>')
        + '\n  <div class="layer place" id="numWrap" style="opacity:0;left:110px;top:560px;width:860px;height:200px;text-align:center">'
          '<div id="counter" class="stamp" style="font-size:150px;color:#F5C451;filter:drop-shadow(0 0 30px rgba(245,196,81,.45))">0</div></div>'
+       + svg("ringL", "", "opacity:0")
        + '\n  <div class="layer" id="nMount"></div>',
-  notes="100 pictograms; 60 light exactly on the word 'sixty'; a count-up lands on the same word.",
+  notes="100 pictograms; 60 light exactly on the word 'sixty'; a count-up and a ring land on the same word.",
   script=COLD_JS + f'''$("#crowdArt").innerHTML = ART.crowd();
 EL.anim($("#crowdLayer"), "fadeIn", {W(n,"hundred")-0.3:.2f}, .4, "linear");
 document.querySelectorAll("#crowdArt .fig").forEach((f,i)=>{{
@@ -107,6 +122,9 @@ document.querySelectorAll("#crowdArt .fig").forEach((f,i)=>{{
 /* the shared clock's counter: count from 0 to 60 across "light up, exactly on the word sixty" */
 const c = $("#counter"); c.dataset.countTo = 60;
 c.dataset.countStart = {W(n,"sixty")-0.9:.2f}; c.dataset.countEnd = {W(n,"sixty")+0.05:.2f};
+$("#ringL svg").innerHTML = KIT.chart.donut(540, 640, 132, 60, {{color:"#F5C451", width:16}});
+EL.anim($("#ringL"), "fadeIn", {W(n,"sixty")-0.9:.2f}, .3, "linear");
+KIT.chart.fillRing($("#ringL .ring"), {W(n,"sixty")-0.9:.2f}, .95);
 EL.anim($("#numWrap"), "popInHard", {W(n,"sixty")-0.9:.2f}, .4, "var(--e-back)");
 EL.ncard($("#nMount"), {{at:{W(n,"Data")}, top:330, size:70, times:{WS(n,"Data","care")}, end:{W(n,"Out")-0.3:.2f},
   text:"Data gets the same care."}});
@@ -136,18 +154,19 @@ $("#art1").innerHTML = ART.blueprintSheet(0, 0, 400, 400, "FIG. 2") +
   ART.isoBox(115, 310, 55, 55, 80, "none", "none", "none", "#E6F2FF") +
   '<path d="M60 335 L340 335" stroke="#CFE6FA" stroke-width="2" stroke-dasharray="6 6"/>';
 /* 3 ink: hatched hill, a house and a tree in a wobbly hand-drawn line */
-$("#art2").innerHTML = '<path d="M0 300 Q120 220 240 270 T400 250 L400 400 L0 400Z" fill="url(#hatch)"/>' +
+$("#art2").innerHTML = KIT.style.wash("M0 300 Q120 220 240 270 T400 250 L400 400 L0 400Z", "#8FB8DE", .45) +
+  '<path d="M0 300 Q120 220 240 270 T400 250 L400 400 L0 400Z" fill="url(#hatch)"/>' +
   ART.ink("M0 300 Q120 220 240 270 T400 250") +
   ART.ink("M130 250 L130 175 L185 135 L240 175 L240 255 M165 255 L165 215 L195 215 L195 255") +
   ART.ink("M300 262 L300 195 M300 200 C 258 192 258 128 300 118 C 344 124 344 192 300 200", "#1B1A17", 4);
 /* 4 isometric city */
 $("#art3").innerHTML = [[150,300,70,70,120],[245,320,60,60,70],[90,340,50,50,55],[205,370,70,40,40]]
-  .map(b => ART.isoBox(...b, "#F7FBFF", "#9DB4FF", "#5C74C4")).join("");
+  .map(b => ART.isoBox(...b, "#F7FBFF", "#9DB4FF", "#5C74C4")).join("") + KIT.person(330, 330, .42, "wave", "#FF8FA3");
 /* 5 neon: a wave and a ring as glowing tubes */
-$("#art4").innerHTML = ART.neon(ART.wave(260, 34, 200, 0, 20, 380), "#5CF2FF") +
+$("#art4").innerHTML = KIT.bg.starfield(50, 3, 0, 0, 400, 400) + ART.neon(ART.wave(260, 34, 200, 0, 20, 380), "#5CF2FF") +
   ART.neon("M200 70 a70 70 0 1 1 -0.1 0", "#FF5CD6", 6);
 /* 6 light: lit 3D spheres in dust */
-$("#art5").innerHTML = ART.particles(40, 9, 0, 0, 400, 400, "#F4F7FB", 1, 2.5) +
+$("#art5").innerHTML = KIT.bg.aurora(["#3D2C8D","#00C2D1","#FF5E8A"], 6, 0, 0, 400, 400, "#0B0E14") + ART.particles(40, 9, 0, 0, 400, 400, "#F4F7FB", 1, 2.5) +
   ART.sphere(170, 200, 90, "spA") + ART.sphere(300, 262, 46, "spB", "#D6E4FF", "#7D9BFF", "#1A2350");
 '''
 SHOTS.append(dict(n=n, title="ANY STYLE", grain=.04,
@@ -168,13 +187,21 @@ EL.ncard($("#nMount"), {{at:{W(n,"And")}, top:250, size:58, times:{WS(n,"And","n
 n = 6; D = DUR[n]
 SHOTS.append(dict(n=n, title="END CARD", grain=.04,
   body='''
-  <div class="layer" style="background:radial-gradient(ellipse 70% 30% at 50% 45%,rgba(78,159,219,.14),rgba(0,0,0,0))"></div>
+  <div class="layer" id="aurL" style="opacity:0"><svg viewBox="0 0 1080 1920" width="1080" height="1920" style="position:absolute"><g id="aur"></g></svg></div>
+  <div class="layer" id="blobL" style="opacity:0;mix-blend-mode:screen"><svg viewBox="0 0 1080 1920" width="1080" height="1920" style="position:absolute">
+    <path id="mb" d="" fill="none" stroke="#7FC0EE" stroke-width="5" filter="url(#neon)"/></svg></div>
   <div class="layer center" id="lineWrap" style="opacity:0">
     <div id="line" style="font-family:var(--display);font-weight:700;font-size:100px;letter-spacing:-.03em;
          color:var(--n);text-align:center;line-height:1.05;text-shadow:0 0 60px rgba(78,159,219,.35)">Every cue<br><span style="color:var(--ink)">is a word.</span></div>
   </div>''',
   notes="Display line built per character (EL.kinetic) — short lines only.",
   script=f'''injectDefs([]);
+/* a living background: aurora drifting, an organic outline morphing through four shapes */
+$("#aur").innerHTML = KIT.bg.aurora(["#2B2D7C","#0E7C9B","#7B2C8F","#155E75"], 5);
+KIT.bg.animateAurora($("#aur"), 9);
+EL.anim($("#aurL"), "fadeIn", 0.0, 1.2, "var(--e-soft)");
+EL.morph($("#mb"), [1,2,3,4,1].map(s => ART.blob(540, 900, 300, s, 9, .2)), 0.0, {D:.2f}, "var(--e-circ-io)");
+EL.anim($("#blobL"), "fadeIn", 0.3, 1.0, "var(--e-soft)");
 EL.anim($("#lineWrap"), "fadeIn", {W(n,"Every")-0.1:.2f}, .3, "linear");
 EL.kinetic($("#line"), {{name:"riseMask", stagger:{(WE(n,"word")-W(n,"Every"))/18:.3f}, dur:.7, delay:{W(n,"Every")-0.05:.2f}}});
 {cut(n)}'''))

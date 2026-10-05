@@ -51,8 +51,9 @@ for (const s of shots) {
   const end = s.off + s.dur;
   while (k < frames && k / fps < end - 1e-9) {
     const t = k / fps - s.off;
-    await page.evaluate(t => { for (const a of document.getAnimations()) { a.pause(); a.currentTime = t * 1000; }
-      if (window.M && M.seek) M.seek(t); if (typeof render === 'function') render(t); }, t);
+    await page.evaluate(t => { /* render first: per-frame ticks may create animations (lazy annotations), then seek them all */
+      if (typeof render === 'function') render(t); else if (window.M && M.seek) M.seek(t);
+      for (const a of document.getAnimations()) { a.pause(); a.currentTime = t * 1000; } }, t);
     const buf = await page.screenshot({ type: 'jpeg', quality: 93, clip: { x: 0, y: 0, width: 1080, height: 1920 } });
     if (!ff.stdin.write(buf)) await new Promise(r => ff.stdin.once('drain', r));
     k++;
